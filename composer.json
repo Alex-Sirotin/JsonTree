@@ -1,0 +1,13 @@
+{
+    "name": "abcship/json-tree",
+    "authors": [
+        {
+            "name": "Alex Sirotin",
+            "email": "Alexander.Sirotin@gmail.com"
+        }
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "*",
+        "fakerphp/faker": "*"
+    }
+}
