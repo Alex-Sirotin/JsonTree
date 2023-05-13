@@ -4,6 +4,8 @@ WORKDIR /app
 
 RUN apt-get update
 
+RUN mkdir -p /usr/share/man/man1
+
 RUN apt-get install -y libgmp-dev re2c libmhash-dev libmcrypt-dev file
 RUN ln -s /usr/include/x86_64-linux-gnu/gmp.h /usr/local/include/
 RUN docker-php-ext-configure gmp
@@ -57,12 +59,15 @@ RUN mkdir -p /app/xhprof
 RUN cp -r /usr/local/lib/php/xhprof_html /app/xhprof
 RUN cp -r /usr/local/lib/php/xhprof_lib /app/xhprof
 
+RUN apt-get install -y libyaml-dev
+RUN pecl install yaml
+RUN docker-php-ext-enable yaml
+
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
 COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
 RUN composer self-update
 
-RUN mkdir -p /usr/share/man/man1
 RUN apt-get install -y git
 RUN apt-get install -y sudo
 RUN apt-get install -y wget

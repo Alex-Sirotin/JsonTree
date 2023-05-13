@@ -24,4 +24,14 @@ trait Memory
 
         return $memoryUsed < $memoryLimit;
     }
+
+    public function getMemory(): int
+    {
+        return memory_get_usage();
+    }
+
+    public function getUsage(int $before): int
+    {
+        return memory_get_usage() - $before;
+    }
 }
