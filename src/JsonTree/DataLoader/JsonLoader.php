@@ -1,8 +1,7 @@
 <?php
 
-namespace ABCship\JsonTree;
+namespace ABCship\JsonTree\DataLoader;
 
-use Generator;
 use Exception;
 use SplFileInfo;
 use SplFileObject;
@@ -11,10 +10,10 @@ class JsonLoader implements DataLoaderInterface
 {
     /**
      * @param string $filename
-     * @return Generator
+     * @return iterable
      * @throws Exception
      */
-    public function loadFromFile(string $filename): Generator
+    public function loadFromFile(string $filename): iterable
     {
         $fileInfo = new SplFileInfo($filename);
         if (!$fileInfo->isFile()) {

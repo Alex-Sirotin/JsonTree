@@ -2,7 +2,7 @@
 
 namespace ABCship\Tests\unit;
 
-use ABCship\JsonTree\JsonLoader;
+use ABCship\JsonTree\DataLoader\JsonLoader;
 use ABCship\Tests\JsonTreeTestCase;
 use Exception;
 
