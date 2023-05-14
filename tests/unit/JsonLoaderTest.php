@@ -1,14 +1,20 @@
 <?php
 
+namespace ABCship\Tests\unit;
 
-use PHPUnit\Framework\TestCase;
+use ABCship\JsonTree\JsonLoader;
+use ABCship\Tests\JsonTreeTestCase;
+use Exception;
 
 class JsonLoaderTest extends JsonTreeTestCase
 {
+    /**
+     * @throws Exception
+     */
     public function testLoadFromFile()
     {
-        $loader = new \ABCship\JsonTree\JsonLoader();
-        foreach ($loader->loadFromFile('../data/data.json') as $line) {
+        $loader = new JsonLoader();
+        foreach ($loader->loadFromFile(APPLICATION_PATH . '/data/data.json') as $line) {
             $this->assertJson($line);
         }
     }

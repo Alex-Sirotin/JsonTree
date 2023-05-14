@@ -76,7 +76,7 @@ class GenerateCommand extends Command
         $timeStart = hrtime(true);
         $memoryStart = $this->getMemory();
 
-        $fileName = $this->generate(
+        $fileName = FileGenerator::generateFile(
             $rows,
             $dir,
             $file,
@@ -98,24 +98,5 @@ class GenerateCommand extends Command
         $output->writeln("Memory: {$usedMemory} Mb");
 
         return Command::SUCCESS;
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function generate(
-        ?int $rows,
-        ?string $dir,
-        ?string $file,
-        ?int $memoryLimit,
-        ?int $batchSize,
-        ?int $startId,
-        ?int $step,
-        ?bool $useFaker,
-        ?string $label,
-        ?bool $recreateIfExists
-    ): string {
-        $file = new FileGenerator($rows, $dir, $file, $memoryLimit);
-        return $file->generate($batchSize, $startId, $step, $recreateIfExists, $useFaker, $label);
     }
 }

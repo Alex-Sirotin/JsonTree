@@ -215,4 +215,23 @@ class FileGenerator
 
         return $result;
     }
+
+    /**
+     * @throws Exception
+     */
+    public static function generateFile(
+        ?int $rows,
+        ?string $dir,
+        ?string $file,
+        ?int $memoryLimit,
+        ?int $batchSize,
+        ?int $startId,
+        ?int $step,
+        ?bool $useFaker,
+        ?string $label,
+        ?bool $recreateIfExists
+    ): string {
+        $file = new self($rows, $dir, $file, $memoryLimit);
+        return $file->generate($batchSize, $startId, $step, $recreateIfExists, $useFaker, $label);
+    }
 }
