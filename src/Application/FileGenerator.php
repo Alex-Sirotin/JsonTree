@@ -4,7 +4,8 @@ namespace ABCship\Application;
 
 use ABCship\Application\Utils\Memory;
 use Exception;
-use Faker\Generator as FakeGenerator;
+use \Faker\Factory as FakerFactory;
+use \Faker\Generator as FakeGenerator;
 use Generator;
 use SplFileInfo;
 use SplFileObject;
@@ -13,6 +14,7 @@ class FileGenerator
 {
     use Memory;
 
+    public const DEFAULT_DIR = APPLICATION_PATH . "/data";
     public const DEFAULT_ROW_LIMIT = 100_000;
     public const DEFAULT_BATCH_SIZE = 10_000;
     public const NODE_START_ID = 1;
@@ -23,17 +25,23 @@ class FileGenerator
     private string $file;
     private string $fileName;
     private int $rowLimit;
+    private int $memoryLimit;
     private FakeGenerator $faker;
 
     /**
      * @param int|null $rowLimit
      * @param string|null $dir
      * @param string|null $file
+     * @param int|null $memoryLimit
      * @throws Exception
      */
-    public function __construct(?int $rowLimit = null, ?string $dir = null, ?string $file = null)
-    {
-        $this->dir = realpath(__DIR__ . "/../data");
+    public function __construct(
+        ?int $rowLimit = null,
+        ?string $dir = null,
+        ?string $file = null,
+        ?int $memoryLimit = 0
+    ) {
+        $this->dir = realpath(self::DEFAULT_DIR);
         if ($dir) {
             $this->dir = $dir;
         }
@@ -42,9 +50,7 @@ class FileGenerator
         }
 
         $this->rowLimit = $rowLimit ?: self::DEFAULT_ROW_LIMIT;
-
-        $rowLimitFormatted = number_format($this->rowLimit, 0, '', '_');
-        $this->file = "fake_data_{$rowLimitFormatted}.json";
+        $this->file = $this->getDefaultFileName($this->rowLimit);
 
         if ($file) {
             $this->file = $file;
@@ -52,18 +58,24 @@ class FileGenerator
 
         $this->fileName = "{$this->dir}/{$this->file}";
 
-        if (is_writable($this->fileName)) {
-            throw new Exception("Can't open file {$this->fileName}");
+        if (file_exists($this->fileName) && !is_writable($this->fileName)) {
+            throw new Exception("Can't write file {$this->fileName}");
         }
+
+        $this->faker = FakerFactory::create();
+
+        $this->memoryLimit = $memoryLimit && ($memoryLimit < $this->getMemoryLimit()) ? $memoryLimit : intdiv($this->getMemoryLimit(), 2);
     }
 
     /**
-     * @param FakeGenerator|null $faker
-     * @return void
+     * @param int|null $rowLimit
+     * @return string
      */
-    public function setFaker(?FakeGenerator $faker): void
+    public static function getDefaultFileName(?int $rowLimit = null): string
     {
-        $this->faker = $faker;
+        $rowLimit = $rowLimit ?: self::DEFAULT_ROW_LIMIT;
+        $rowLimitFormatted = number_format($rowLimit, 0, '', '_');
+        return "fake_data_{$rowLimitFormatted}.json";
     }
 
     /**
@@ -96,16 +108,19 @@ class FileGenerator
      * @param int $nodeId
      * @param int $startId
      * @param int $step
+     * @param bool $useFaker
      * @param string|null $name
      * @return string
      */
-    private function getElement(int $nodeId, int $startId, int $step, ?string $name = null): string
+    private function getElement(int $nodeId, int $startId, int $step, bool $useFaker = false, ?string $name = null): string
     {
         if (!$name) {
-            $name = self::NODE_FAKE_NAME . ' ' . $nodeId;
-            if (isset($this->faker)) {
-                $name = $this->faker->word();
-            }
+            $name = self::NODE_FAKE_NAME;
+        }
+        $name .= ' ' . $nodeId;
+
+        if (isset($this->faker) && $useFaker) {
+            $name = $this->faker->word();
         }
 
         return json_encode([
@@ -120,6 +135,8 @@ class FileGenerator
      * @param int $startId
      * @param int $step
      * @param bool $recreateIfExists
+     * @param bool $useFaker
+     * @param string|null $name
      * @return string
      * @throws Exception
      */
@@ -127,18 +144,20 @@ class FileGenerator
         int $batchSize = self::DEFAULT_BATCH_SIZE,
         int $startId = self::NODE_START_ID,
         int $step = self::NODE_STEP,
-        bool $recreateIfExists = false
+        bool $recreateIfExists = false,
+        bool $useFaker = false,
+        ?string $name = null
     ): string {
         $file = $this->checkFile($recreateIfExists);
         if (!$file) {
             return $this->fileName;
         }
 
-        $file->fwrite("[\n");
-        foreach ($this->getData($batchSize, $startId, $step) as $data) {
+        $file->fwrite("[" . PHP_EOL);
+        foreach ($this->getData($batchSize, $startId, $step, $useFaker, $name) as $data) {
             $file->fwrite($data);
         }
-        $file->fwrite("\n]");
+        $file->fwrite(PHP_EOL . "]");
 
         return $file->getPathname();
     }
@@ -147,33 +166,34 @@ class FileGenerator
      * @param int $batchSize
      * @param int $startId
      * @param int $step
+     * @param bool $useFaker
+     * @param string|null $name
      * @return Generator
      */
-    public function getData(
+    private function getData(
         int $batchSize = self::DEFAULT_BATCH_SIZE,
         int $startId = self::NODE_START_ID,
-        int $step = self::NODE_STEP
+        int $step = self::NODE_STEP,
+        bool $useFaker = false,
+        ?string $name = null
     ): Generator {
-        //$result = [];
         $result = "";
         $batch = 0;
-        $memoryLimit = intdiv($this->getMemoryLimit(), 2);
-
         $maxId = ($this->rowLimit - 1) * $step + $startId;
         for ($i = $startId; $i <= $maxId; $i += $step) {
-            $elem = $this->getElement($i, $startId, $step) . ",\n";
-            $memoryUsed = (memory_get_usage() + strlen($elem));
-            $isLimitReached = $memoryUsed > $memoryLimit;
+            $isLimitReached = $this->isLimitReached($this->memoryLimit - strlen($result));
             if ($isLimitReached || $i >= $maxId || $batch >= $batchSize) {
                 yield $result;
                 $result = "";
                 $batch = 0;
             }
-            $result .= $elem;
+            $result .= $this->getElement($i, $startId, $step, $useFaker, $name) . "," . PHP_EOL;
             $batch++;
         }
+
         if ($result) {
-            yield trim($result, ",\n");
+            yield trim($result, "," . PHP_EOL);
+            unset($result);
         }
     }
 

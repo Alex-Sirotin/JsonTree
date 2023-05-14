@@ -4,25 +4,14 @@ namespace ABCship\Application;
 
 require_once 'Bootstrap.php';
 
+use ABCship\Application\Command\GenerateCommand;
 use Symfony\Component\Console\Application;
-use ABCship\Application\Command\TreeCommand;
-
-//use Monolog\Level;
-//use Monolog\Logger;
-//use Monolog\Handler\StreamHandler;
-
-//// create a log channel
-//$log = new Logger('name');
-//$log->pushHandler(new StreamHandler('path/to/your.log', Level::Warning));
-//
-//// add records to the log
-//$log->warning('Foo');
-//$log->error('Bar');
+//use ABCship\Application\Command\TreeCommand;
 
 $app = new Application();
 
 $app->add(new GenerateCommand());
-$app->add(new TreeCommand());
+//$app->add(new TreeCommand());
 
 try {
     $app->run();

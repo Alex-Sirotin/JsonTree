@@ -18,21 +18,51 @@ trait Memory
         return ($size[$multiplier] ?? 1) * intval($memoryLimit);
     }
 
-    public function isAvailable(int $offset): bool
+    /**
+     * @param int $offset
+     * @return bool
+     */
+    public function isAvailable(int $offset = 0): bool
     {
-        $memoryLimit = intdiv($this->getMemoryLimit(), 2);
-        $memoryUsed = (memory_get_usage() + $offset);
-
-        return $memoryUsed < $memoryLimit;
+        return $this->getMemory() < ($this->getMemoryLimit() - $offset);
     }
 
-    public function getMemory(): int
+    /**
+     * @param bool $realUsage
+     * @return int
+     */
+    public function getMemory(bool $realUsage = true): int
     {
-        return memory_get_usage();
+        return memory_get_usage($realUsage);
     }
 
-    public function getUsage(int $before): int
+    /**
+     * @param int $limit
+     * @param bool $realUsage
+     * @return int
+     */
+    public function isLimitReached(int $limit, bool $realUsage = true): int
     {
-        return memory_get_usage() - $before;
+        return $this->getMemory($realUsage) > $limit;
+    }
+
+    /**
+     * @param int $before
+     * @param bool $realUsage
+     * @return int
+     */
+    public function getUsage(int $before, bool $realUsage = true): int
+    {
+        return memory_get_usage($realUsage) - $before;
+    }
+
+    /**
+     * @param int $before
+     * @param bool $realUsage
+     * @return int
+     */
+    public function getPeakUsage(int $before, bool $realUsage = true): int
+    {
+        return memory_get_peak_usage($realUsage) - $before;
     }
 }
