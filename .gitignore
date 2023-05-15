@@ -4,3 +4,4 @@ nbproject
 *.cache
 data/fake_data*
 composer.phar
+logs/
