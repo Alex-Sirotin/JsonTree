@@ -1,11 +1,10 @@
 <?php
 
-namespace ABCship\JsonTree;
+namespace ABCship\JsonTree\Tree;
 
 use ABCship\Application\Utils\Log;
 use ABCship\JsonTree\StoreProvider\File\Provider;
 use ABCship\JsonTree\StoreProvider\StoreProviderInterface;
-use ABCship\JsonTree\Tree\TreeNodeInterface;
 
 class Tree
 {
@@ -53,12 +52,17 @@ class Tree
 
     /**
      * @param callable $callback
-     * @return void
+     * @return iterable
      */
     public function traverseDepthFirst(callable $callback): void
     {
+        foreach ($this->traverse($callback) as $item) {}
+    }
+
+    private function traverse(callable $callback): iterable
+    {
         if (isset($this->root)) {
-            $this->storeProvider->traverseDepthFirst($callback, $this->root->getId());
+            return $this->storeProvider->traverseDepthFirst($callback, $this->root->getId());
         }
     }
 
@@ -94,7 +98,9 @@ class Tree
      */
     public function flattenTree(): iterable
     {
-        return $this->storeProvider->getData();
+        yield from $this->traverse(function($node) {
+            return $node->toArray();
+        });
     }
 
     /**

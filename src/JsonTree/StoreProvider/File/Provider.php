@@ -116,12 +116,12 @@ class Provider /*extends AbstractStoreProvider*/ implements StoreProviderInterfa
         }
     }
 
-    public function traverseDepthFirst(callable $callback, int $rootId): void
+    public function traverseDepthFirst(callable $callback, int $rootId): iterable
     {
         $node = $this->search($rootId);
-        $callback($node);
+        yield $callback($node);
         foreach ($this->getChildren($node->getId()) as $childId) {
-            $this->traverseDepthFirst($callback, $childId);
+            yield from $this->traverseDepthFirst($callback, $childId);
         }
     }
 

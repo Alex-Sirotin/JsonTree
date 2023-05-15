@@ -9,7 +9,7 @@ interface StoreProviderInterface
 {
     public function search(int $id): ?TreeNodeInterface;
     public function searchTree(int $nodeId): ?iterable;
-    public function traverseDepthFirst(callable $callback, int $rootId): void;
+    public function traverseDepthFirst(callable $callback, int $rootId): iterable;
     public function add(int $id, string $name, ?int $parentId): TreeNodeInterface;
     public function get(int $id, string $name, ?int $parentId): TreeNodeInterface;
     public function getData(): iterable;

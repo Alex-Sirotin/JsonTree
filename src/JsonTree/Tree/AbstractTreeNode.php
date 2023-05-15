@@ -9,7 +9,7 @@ abstract class AbstractTreeNode implements TreeNodeInterface, Stringable
     /** @var int */
     protected int $id;
 
-    /** @var int */
+    /** @var ?int */
     protected ?int $parentId = null;
 
     /** @var TreeNodeInterface */
@@ -117,5 +117,14 @@ abstract class AbstractTreeNode implements TreeNodeInterface, Stringable
     public function __toString()
     {
         return "ID: {$this->getId()}, ParentID: {$this->getParentId()}, name: {$this->getName()} ";
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'name' => $this->getName(),
+            'parent_id' => $this->getParentId(),
+        ];
     }
 }

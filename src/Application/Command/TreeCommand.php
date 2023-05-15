@@ -4,7 +4,7 @@ namespace ABCship\Application\Command;
 
 use ABCship\JsonTree\DataLoader\JsonLoader;
 use ABCship\JsonTree\StoreProvider\File\Provider;
-use ABCship\JsonTree\Tree;
+use ABCship\JsonTree\Tree\Tree;
 use Exception;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -104,6 +104,11 @@ class TreeCommand extends Command
 
         if ($traverse) {
             $output->writeln('Traverse');
+//            foreach ($tree->traverseDepthFirst(function($node) use ($output) {
+//                $output->writeln("I'm {$node->getName()}({$node->getId()})");
+//            }) as $item) {
+//                $output->writeln(1);
+//            };
             $tree->traverseDepthFirst(function($node) use ($output) {
                 $output->writeln("I'm {$node->getName()}({$node->getId()})");
             });
