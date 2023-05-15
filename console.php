@@ -6,12 +6,12 @@ require_once 'Bootstrap.php';
 
 use ABCship\Application\Command\GenerateCommand;
 use Symfony\Component\Console\Application;
-//use ABCship\Application\Command\TreeCommand;
+use ABCship\Application\Command\TreeCommand;
 
 $app = new Application();
 
 $app->add(new GenerateCommand());
-//$app->add(new TreeCommand());
+$app->add(new TreeCommand());
 
 try {
     $app->run();
