@@ -106,6 +106,7 @@ class Provider /*extends AbstractStoreProvider*/ implements StoreProviderInterfa
     public function searchTree(int $nodeId): ?iterable
     {
         $node = $this->search($nodeId);
+        yield $node;
         if (!$node) {
             return null;
         }
@@ -119,10 +120,8 @@ class Provider /*extends AbstractStoreProvider*/ implements StoreProviderInterfa
     {
         $node = $this->search($rootId);
         $callback($node);
-        foreach ($node->getChildren() as $child) {
-            if ($child instanceof TreeNodeInterface) {
-                $this->traverseDepthFirst($callback, $child->getId());
-            }
+        foreach ($this->getChildren($node->getId()) as $childId) {
+            $this->traverseDepthFirst($callback, $childId);
         }
     }
 
@@ -134,10 +133,13 @@ class Provider /*extends AbstractStoreProvider*/ implements StoreProviderInterfa
         return $this->get($id, $name, $parentId);
     }
 
-    private function getChildren(int $nodeId): iterable
+    private function getChildren(int $nodeId): ?iterable
     {
         $page = $this->getPageIndex($nodeId);
-        $file = $this->parentPages[$page];
+        $file = $this->parentPages[$page] ?? false;
+        if (!$file) {
+            return null;
+        }
         $file->rewind();
         while (!$file->eof()) {
             list($foundId, $foundParentId) = $file->fgetcsv();
@@ -145,8 +147,6 @@ class Provider /*extends AbstractStoreProvider*/ implements StoreProviderInterfa
                 yield $foundId;
             }
         }
-
-        return null;
     }
 
     public function get(int $id, string $name, ?int $parentId): TreeNodeInterface

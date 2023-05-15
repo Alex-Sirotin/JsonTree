@@ -24,6 +24,7 @@ class TreeCommand extends Command
             ->addOption('redis', 'r', InputOption::VALUE_NONE, 'Save tree to Redis')
             ->addOption('file', 'f', InputOption::VALUE_NONE, 'Save tree to filesystem')
             ->addOption('list', 'l', InputOption::VALUE_NONE, 'List all nodes')
+            ->addOption('traverse', 't', InputOption::VALUE_NONE, 'Traverse tree')
             ->addOption('search', 's', InputOption::VALUE_OPTIONAL|InputOption::VALUE_IS_ARRAY, 'Search node(s)')
             ->addOption('path', 'p', InputOption::VALUE_OPTIONAL|InputOption::VALUE_IS_ARRAY, 'Show node(s) path');
         parent::configure();
@@ -43,7 +44,8 @@ class TreeCommand extends Command
             'file' => $file,
             'list' => $list,
             'search' => $search,
-            'path' => $path
+            'path' => $path,
+            'traverse' => $traverse
         ) = $input->getOptions();
 
         if ($inMemory || $db || $redis) {
@@ -94,12 +96,17 @@ class TreeCommand extends Command
                 $output->writeln("Node: {$nodeId}");
                 foreach ($tree->searchTree($nodeId) as $nodePath) {
                     $output->writeln($nodePath);
-//                    foreach ($nodePath as $node) {
-//                        $output->writeln($node);
-//                    }
                 }
                 $output->writeln('');
             }
+            $output->writeln('');
+        }
+
+        if ($traverse) {
+            $output->writeln('Traverse');
+            $tree->traverseDepthFirst(function($node) use ($output) {
+                $output->writeln("I'm {$node->getName()}({$node->getId()})");
+            });
             $output->writeln('');
         }
 

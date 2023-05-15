@@ -6,14 +6,12 @@ use ABCship\Application\Utils\Log;
 use ABCship\JsonTree\StoreProvider\File\Provider;
 use ABCship\JsonTree\StoreProvider\StoreProviderInterface;
 use ABCship\JsonTree\Tree\TreeNodeInterface;
-use Generator;
 
 class Tree
 {
     use Log;
 
-    private int $rootId;
-
+    private ?TreeNodeInterface $root = null;
     private StoreProviderInterface $storeProvider;
 
     public function __construct(?StoreProviderInterface $storeProvider)
@@ -23,6 +21,7 @@ class Tree
 
     private function prepare(): void
     {
+        $this->root = null;
         $this->storeProvider->prepare();
     }
 
@@ -34,21 +33,32 @@ class Tree
     {
         $this->prepare();
         foreach ($data as $item) {
-            list($id, $parentId, $name) = $this->parse($item);
+            list($id, $name, $parentId) = $this->parse($item);
 
             if (!$id) {
                 continue;
             }
 
             if (!isset($parentId)) {
-                if (isset($this->rootId)) {
-                    $this->error("Too many roots {$this->rootId}, {$id}");
+                if (isset($this->root)) {
+                    $this->error("Too many roots {$this->root->getId()}, {$id}");
                     continue;
                 }
-                $this->rootId = $id;
+                $this->root = $this->storeProvider->get($id, $name, $parentId);
             }
 
-            $this->add($id, $parentId, $name);
+            $this->add($id, $name, $parentId);
+        }
+    }
+
+    /**
+     * @param callable $callback
+     * @return void
+     */
+    public function traverseDepthFirst(callable $callback): void
+    {
+        if (isset($this->root)) {
+            $this->storeProvider->traverseDepthFirst($callback, $this->root->getId());
         }
     }
 

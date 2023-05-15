@@ -43,21 +43,23 @@ class JsonTreeTest extends JsonTreeTestCase
             [3, "Node 3", 1],
             [10, "Node 10",5],
             [4, "Node 4", 3],
-            [11, "Node 10"],
             [5, "Node 5", 5],
             [6, "Node 6", 4],
             [7, "Node 7", 4],
         ];
 
         $this->assertIsIterable($this->tree->flattenTree());
+        $count = 0;
         foreach($this->tree->flattenTree() as $row) {
             list('name' => $name, 'id' => $id, 'parent_id' => $parent) = $row;
-            list($id2, , $parent2) = current($result);
+            list($id2, $name2, $parent2) = current($result);
             $this->assertEquals($id2, $id);
             $this->assertEquals($parent2, $parent);
-            $this->assertEquals($name, $name);
+            $this->assertEquals($name2, $name);
             next($result);
+            $count++;
         }
+        $this->assertEquals(count($result), $count);
     }
 
     public function testSearch()
