@@ -27,7 +27,7 @@ abstract class TreeNode implements TreeNodeInterface, Stringable
     {
         $this->id = $id;
         $this->name = $name;
-        $this->parentId = $parentId;
+        $this->parentId = $parentId ? : null;
     }
 
     /**
@@ -67,11 +67,11 @@ abstract class TreeNode implements TreeNodeInterface, Stringable
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getParentId(): int
+    public function getParentId(): ?int
     {
-        return $this->parentId;
+        return is_numeric($this->parentId) ? $this->parentId : null;
     }
 
     /**
@@ -87,7 +87,8 @@ abstract class TreeNode implements TreeNodeInterface, Stringable
      */
     public function __toString()
     {
-        return "ID: {$this->getId()}, ParentID: {$this->getParentId()}, name: {$this->getName()} ";
+        $parentId = $this->getParentId() ? : 'null';
+        return "ID: {$this->getId()}, ParentID: {$parentId}, name: {$this->getName()} ";
     }
 
     /**

@@ -3,7 +3,6 @@
 namespace ABCship\Tests\unit;
 
 use ABCship\JsonTree\StoreProvider\File\Node;
-use ABCship\JsonTree\Tree\TreeNode;
 use ABCship\JsonTree\Tree\TreeNodeInterface;
 
 class JsonTreeNodeTest extends \ABCship\Tests\JsonTreeTestCase

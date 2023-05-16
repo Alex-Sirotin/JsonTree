@@ -26,7 +26,7 @@ interface TreeNodeInterface
     public function getId(): int;
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getParentId(): int;
+    public function getParentId(): ?int;
 }

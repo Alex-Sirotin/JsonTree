@@ -21,6 +21,10 @@ trait Log
             $file = self::DEFAULT_LOG_FILE;
         }
 
+        if (!is_dir(self::DEFAULT_LOG_FILE)) {
+            mkdir(self::DEFAULT_LOG_FILE);
+        }
+
         if (self::$logger[$name] ?? false) {
             return self::$logger[$name];
         }

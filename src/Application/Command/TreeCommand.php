@@ -104,11 +104,6 @@ class TreeCommand extends Command
 
         if ($traverse) {
             $output->writeln('Traverse');
-//            foreach ($tree->traverseDepthFirst(function($node) use ($output) {
-//                $output->writeln("I'm {$node->getName()}({$node->getId()})");
-//            }) as $item) {
-//                $output->writeln(1);
-//            };
             $tree->traverseDepthFirst(function($node) use ($output) {
                 $output->writeln("I'm {$node->getName()}({$node->getId()})");
             });

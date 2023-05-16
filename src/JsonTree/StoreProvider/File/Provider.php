@@ -13,7 +13,7 @@ class Provider implements StoreProviderInterface
     use Memory;
 
     const MAX_PAGE_COUNT = 1024;
-    const DEFAULT_PAGE_COUNT = 128;
+    const DEFAULT_PAGE_COUNT = 16;
     private int $pageCount;
     private array $pages = [];
     private array $parentPages = [];
@@ -58,7 +58,7 @@ class Provider implements StoreProviderInterface
     {
         $pageNum = $this->getPageIndex($id);
         if (!isset($this->pages[$pageNum])) {
-            $this->pages[$pageNum] = new SplTempFileObject();
+            $this->pages[$pageNum] = new SplTempFileObject(0);
             $this->pages[$pageNum]->setFlags(SplFileObject::READ_CSV);
         }
         $this->pages[$pageNum]->fputcsv([$id, $parentId, $name]);
@@ -73,7 +73,7 @@ class Provider implements StoreProviderInterface
     {
         $parentNum = $this->getPageIndex(($parentId ? : 0));
         if (!isset($this->parentPages[$parentNum])) {
-            $this->parentPages[$parentNum] = new SplTempFileObject();
+            $this->parentPages[$parentNum] = new SplTempFileObject(0);
             $this->parentPages[$parentNum]->setFlags(SplFileObject::READ_CSV);
         }
         $this->parentPages[$parentNum]->fputcsv([$id, $parentId]);
@@ -155,35 +155,6 @@ class Provider implements StoreProviderInterface
             }
         }
     }
-
-//    public function get(int $id, string $name, ?int $parentId): TreeNodeInterface
-//    {
-//        $thi
-//        return new Node($this, $id, $name, $parentId);
-//    }
-//
-//    public function addChild($parentId, TreeNodeInterface $node): Node
-//    {
-//        return $this->create($node->getId(), $node->getName(), $parentId);
-//    }
-//
-//    /**
-//     * @return iterable
-//     */
-//    public function getData(): iterable
-//    {
-//        foreach ($this->pages as $file) {
-//            $file->rewind();
-//            while (!$file->eof()) {
-//                list($id, $parent, $name) = $file->fgetcsv();
-//                yield [
-//                    'id' => $id,
-//                    'name' => $name,
-//                    'parent_id' => $parent,
-//                ];
-//            }
-//        }
-//    }
 
     function prepare(): void
     {

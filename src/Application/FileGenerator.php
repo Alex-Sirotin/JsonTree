@@ -220,16 +220,16 @@ class FileGenerator
      * @throws Exception
      */
     public static function generateFile(
-        ?int $rows,
-        ?string $dir,
-        ?string $file,
-        ?int $memoryLimit,
-        ?int $batchSize,
-        ?int $startId,
-        ?int $step,
-        ?bool $useFaker,
-        ?string $label,
-        ?bool $recreateIfExists
+        ?int $rows = null,
+        ?string $dir = null,
+        ?string $file = null,
+        ?int $memoryLimit = null,
+        ?int $batchSize = self::DEFAULT_BATCH_SIZE,
+        ?int $startId = self::NODE_START_ID,
+        ?int $step = self::NODE_STEP,
+        ?bool $useFaker = false,
+        ?string $label = null,
+        ?bool $recreateIfExists = false
     ): string {
         $file = new self($rows, $dir, $file, $memoryLimit);
         return $file->generate($batchSize, $startId, $step, $recreateIfExists, $useFaker, $label);

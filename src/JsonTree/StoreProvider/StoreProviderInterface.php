@@ -11,7 +11,5 @@ interface StoreProviderInterface
     public function traverseDepthFirst(callable $callback, TreeNodeInterface $root): iterable;
     public function add(int $id, string $name, ?int $parentId): TreeNodeInterface;
     public function buildNode(int $id, string $name, ?int $parentId): TreeNodeInterface;
-//    public function get(int $id, string $name, ?int $parentId): TreeNodeInterface;
-//    public function getData(): iterable;
     function prepare(): void;
 }
