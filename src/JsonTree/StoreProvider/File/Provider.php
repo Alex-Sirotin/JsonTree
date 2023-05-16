@@ -4,12 +4,11 @@ namespace ABCship\JsonTree\StoreProvider\File;
 
 use ABCship\Application\Utils\Memory;
 use ABCship\JsonTree\StoreProvider\StoreProviderInterface;
-use ABCship\JsonTree\Tree\TreeNode;
 use ABCship\JsonTree\Tree\TreeNodeInterface;
 use SplFileObject;
 use SplTempFileObject;
 
-class Provider /*extends AbstractStoreProvider*/ implements StoreProviderInterface
+class Provider implements StoreProviderInterface
 {
     use Memory;
 
@@ -91,7 +90,7 @@ class Provider /*extends AbstractStoreProvider*/ implements StoreProviderInterfa
         while (!$file->eof()) {
             list($foundId, $foundParentId, $foundName) = $file->fgetcsv();
             if ((int)$foundId === $id) {
-                return $this->get(
+                return $this->buildNode(
                     $foundId,
                     $foundName,
                     is_null($foundParentId) ? null : (int)$foundParentId
@@ -116,12 +115,12 @@ class Provider /*extends AbstractStoreProvider*/ implements StoreProviderInterfa
         }
     }
 
-    public function traverseDepthFirst(callable $callback, int $rootId): iterable
+    public function traverseDepthFirst(callable $callback, TreeNodeInterface $root): iterable
     {
-        $node = $this->search($rootId);
+        $node = $this->search($root->getId());
         yield $callback($node);
-        foreach ($this->getChildren($node->getId()) as $childId) {
-            yield from $this->traverseDepthFirst($callback, $childId);
+        foreach ($this->getChildren($node->getId()) as $child) {
+            yield from $this->traverseDepthFirst($callback, $child);
         }
     }
 
@@ -130,10 +129,18 @@ class Provider /*extends AbstractStoreProvider*/ implements StoreProviderInterfa
         $this->addToPage($id, $parentId, $name);
         $this->addToIndex($id, $parentId);
 
-        return $this->get($id, $name, $parentId);
+        return $this->buildNode($id, $name, $parentId);
     }
 
-    private function getChildren(int $nodeId): ?iterable
+    public function buildNode(int $id, string $name, ?int $parentId): TreeNodeInterface
+    {
+        $node = new Node($id, $name, $parentId);
+        $node->setProvider($this);
+
+        return $node;
+    }
+
+    public function getChildren(int $nodeId): ?iterable
     {
         $page = $this->getPageIndex($nodeId);
         $file = $this->parentPages[$page] ?? false;
@@ -144,39 +151,39 @@ class Provider /*extends AbstractStoreProvider*/ implements StoreProviderInterfa
         while (!$file->eof()) {
             list($foundId, $foundParentId) = $file->fgetcsv();
             if ((int)$foundParentId === $nodeId) {
-                yield $foundId;
+                yield $this->search($foundId);
             }
         }
     }
 
-    public function get(int $id, string $name, ?int $parentId): TreeNodeInterface
-    {
-        $children = $this->getChildren($id);
-        return new TreeNode($id, $name, $parentId, $children);
-    }
+//    public function get(int $id, string $name, ?int $parentId): TreeNodeInterface
+//    {
+//        $thi
+//        return new Node($this, $id, $name, $parentId);
+//    }
 //
 //    public function addChild($parentId, TreeNodeInterface $node): Node
 //    {
 //        return $this->create($node->getId(), $node->getName(), $parentId);
 //    }
-
-    /**
-     * @return iterable
-     */
-    public function getData(): iterable
-    {
-        foreach ($this->pages as $file) {
-            $file->rewind();
-            while (!$file->eof()) {
-                list($id, $parent, $name) = $file->fgetcsv();
-                yield [
-                    'id' => $id,
-                    'name' => $name,
-                    'parent_id' => $parent,
-                ];
-            }
-        }
-    }
+//
+//    /**
+//     * @return iterable
+//     */
+//    public function getData(): iterable
+//    {
+//        foreach ($this->pages as $file) {
+//            $file->rewind();
+//            while (!$file->eof()) {
+//                list($id, $parent, $name) = $file->fgetcsv();
+//                yield [
+//                    'id' => $id,
+//                    'name' => $name,
+//                    'parent_id' => $parent,
+//                ];
+//            }
+//        }
+//    }
 
     function prepare(): void
     {

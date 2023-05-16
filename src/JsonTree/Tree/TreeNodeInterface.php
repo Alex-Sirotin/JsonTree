@@ -4,17 +4,17 @@ namespace ABCship\JsonTree\Tree;
 
 interface TreeNodeInterface
 {
-//    /**
-//     * @param ITreeNode $childNode
-//     * @return void
-//     */
-//    public function addChild(ITreeNode $childNode): void;
-//
-//    /**
-//     * @return ITreeNode[]
-//     */
-//    public function getChildren(): array;
-//
+    /**
+     * @param TreeNodeInterface $childNode
+     * @return TreeNodeInterface
+     */
+    public function addChild(TreeNodeInterface $childNode): TreeNodeInterface;
+
+    /**
+     * @return TreeNodeInterface[]
+     */
+    public function getChildren(): iterable;
+
     /**
      * @return string
      */
@@ -29,17 +29,4 @@ interface TreeNodeInterface
      * @return int
      */
     public function getParentId(): int;
-//
-//    /**
-//     * @param int $id
-//     * @return bool
-//     */
-//    public function equal(int $id): bool;
-//
-////    public function getParentId(): int;
-//
-//    /**
-//     * @return ITreeNode
-//     */
-//    public function getParent(): ITreeNode;
 }

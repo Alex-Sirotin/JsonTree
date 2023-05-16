@@ -2,30 +2,103 @@
 
 namespace ABCship\JsonTree\Tree;
 
-class TreeNode extends AbstractTreeNode implements TreeNodeInterface
+use Stringable;
+
+abstract class TreeNode implements TreeNodeInterface, Stringable
 {
-    public function __construct(int $id, string $name, ?int $parentId = null, ?iterable $children = null)
+    /** @var int */
+    protected int $id;
+
+    /** @var ?int */
+    protected ?int $parentId = null;
+
+    /** @var string */
+    protected string $name;
+
+    /** @var TreeNodeInterface[] */
+    protected iterable $children;
+
+    /**
+     * @param int $id
+     * @param string $name
+     * @param int|null $parentId
+     */
+    public function __construct(int $id, string $name, ?int $parentId = null)
     {
-        parent::__construct($id, $name, $parentId);
-        $this->children = $children;
-//        $parent = $this->search($parentId);
-//        if ($parent) {
-//            $this->setParent($parent);
-//        }
+        $this->id = $id;
+        $this->name = $name;
+        $this->parentId = $parentId;
     }
-//
-//    function equal(int $id): bool
-//    {
-//        // TODO: Implement equal() method.
-//    }
-//
-//    public function getChildren(): array
-//    {
-//        // TODO: Implement getChildren() method.
-//    }
-//
-//    public function getParentId(): int
-//    {
-//        // TODO: Implement getParentId() method.
-//    }
+
+    /**
+     * @param TreeNodeInterface $node
+     */
+    protected function setParent(TreeNodeInterface $node): void
+    {
+        $this->parentId = $node->getId();
+    }
+
+    /**
+     * @param TreeNodeInterface $childNode
+     * @return TreeNodeInterface
+     */
+    public function addChild(TreeNodeInterface $childNode): TreeNodeInterface
+    {
+        $childNode->setParent($this);
+        $this->children[] = $childNode;
+
+        return $childNode;
+    }
+
+    /**
+     * @return TreeNodeInterface[]
+     */
+    public function getChildren(): iterable
+    {
+        return $this->children;
+    }
+
+    /**
+     * @return int
+     */
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return int
+     */
+    public function getParentId(): int
+    {
+        return $this->parentId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return "ID: {$this->getId()}, ParentID: {$this->getParentId()}, name: {$this->getName()} ";
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'name' => $this->getName(),
+            'parent_id' => $this->getParentId(),
+        ];
+    }
 }

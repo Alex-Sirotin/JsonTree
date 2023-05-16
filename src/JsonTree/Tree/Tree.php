@@ -43,7 +43,7 @@ class Tree
                     $this->error("Too many roots {$this->root->getId()}, {$id}");
                     continue;
                 }
-                $this->root = $this->storeProvider->get($id, $name, $parentId);
+                $this->root = $this->storeProvider->buildNode($id, $name, $parentId);
             }
 
             $this->add($id, $name, $parentId);
@@ -62,7 +62,7 @@ class Tree
     private function traverse(callable $callback): iterable
     {
         if (isset($this->root)) {
-            return $this->storeProvider->traverseDepthFirst($callback, $this->root->getId());
+            return $this->storeProvider->traverseDepthFirst($callback, $this->root);
         }
     }
 
