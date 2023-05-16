@@ -13,13 +13,15 @@ class JsonTreeBigFileTest extends JsonTreeTestCase
 {
     protected static ?Tree $bigTree;
 
+    const ROW_COUNT = 1_000_000;
+
     /**
      * @throws Exception
      */
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
-        $file = FileGenerator::generateFile(1_000_000);
+        $file = FileGenerator::generateFile(self::ROW_COUNT);
         $loader = new JsonLoader();
         $storeProvider = new Provider(100);
         self::$bigTree = new Tree($storeProvider);
@@ -44,16 +46,17 @@ class JsonTreeBigFileTest extends JsonTreeTestCase
     public function testSearch()
     {
         echo 'testSearch' . PHP_EOL;
-        $node = self::$bigTree->search(999999);
-        $this->assertEquals(999999, $node->getId());
+        $node = self::$bigTree->search(self::ROW_COUNT-1);
+        $this->assertEquals(self::ROW_COUNT-1, $node->getId());
         echo $node . PHP_EOL;
 
         $node = self::$bigTree->search(1);
         $this->assertEquals(1, $node->getId());
         echo $node . PHP_EOL;
 
-        $node = self::$bigTree->search(45678);
-        $this->assertEquals(45678, $node->getId());
+        $id = rand(1, self::ROW_COUNT);
+        $node = self::$bigTree->search($id);
+        $this->assertEquals($id, $node->getId());
         echo $node . PHP_EOL;
         echo PHP_EOL;
         ob_flush();
@@ -62,7 +65,7 @@ class JsonTreeBigFileTest extends JsonTreeTestCase
     public function testSearchTree()
     {
         echo 'testSearchTree' . PHP_EOL;
-        $path = self::$bigTree->searchTree(999999);
+        $path = self::$bigTree->searchTree(self::ROW_COUNT-1);
         $this->assertIsIterable($path);
         foreach($path as $node) {
             echo $node . PHP_EOL;
